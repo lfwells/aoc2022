@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-const input = fs.readFileSync("day4.input").toString();
+const input = fs.readFileSync("day6.input").toString();
 
 let markerSize = 14; //for part 1, change to 4;
 
