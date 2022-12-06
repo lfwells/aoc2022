@@ -3,7 +3,7 @@ const input = `rdzrddbgdbbqtbqbrrznznjzjjctcbtttrvrwwsvwssjfjcjnjzzqgzgzsggfddvn
 let markerSize = 14; //for part 1, change to 4;
 
 let signals = input.split("");
-let last4 = signals.slice(0,14);
+let last4 = signals.slice(0,markerSize);
 
 let i = 0;
 for (i = 4; i < signals.length; i++)
@@ -16,7 +16,7 @@ for (i = 4; i < signals.length; i++)
     let repeats = new Set(last4);
     //console.log({last4String, repeats, size: repeats.size});
     
-    if (repeats.size == 14) { i++; break; }
+    if (repeats.size == markerSize) { i++; break; }
 }
 
 console.log(i);
