@@ -3,18 +3,18 @@ const input = `rdzrddbgdbbqtbqbrrznznjzjjctcbtttrvrwwsvwssjfjcjnjzzqgzgzsggfddvn
 let markerSize = 14; //for part 1, change to 4;
 
 let signals = input.split("");
-let last4 = signals.slice(0,markerSize);
+let last = signals.slice(0,markerSize);
 
 let i = 0;
 for (i = 4; i < signals.length; i++)
 {
-    last4.shift();
-    last4.push(signals[i]);
+    last.shift();
+    last.push(signals[i]);
 
-    let last4String = last4.join("");
+    //let lastString = last.join("");
 
-    let repeats = new Set(last4);
-    //console.log({last4String, repeats, size: repeats.size});
+    let repeats = new Set(last);
+    //console.log({lastString, repeats, size: repeats.size});
     
     if (repeats.size == markerSize) { i++; break; }
 }
