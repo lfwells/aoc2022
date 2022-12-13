@@ -8,7 +8,7 @@ export const multiply = function(arr)
 }
 export const sortProperty = function(arr, predicate)
 {
-    return arr.sort((a,b) => predicate(b).localeCompare(predicate(a)));
+    return arr.sort((a,b) => predicate(b) - predicate(a));
 }
 export const parseInts = function(arr)
 {
