@@ -1,4 +1,3 @@
-import { reverse } from 'dns';
 import * as fs from 'fs';
 import * as utils from "./utils.js";
 
@@ -12,16 +11,26 @@ function mod(n, m) {
 let numbers = utils.parseInts(input.split("\n"));
 
 //part 2
-let key = 811589153;
+let key = isPart2 ? 811589153 : 1;
 let repeats = isPart2 ? 10 : 1;
-if (isPart2) numbers = numbers.map(n => BigInt(n * key));
+    numbers = numbers.map(function(n, i) { return {
+        n:BigInt(n * key)
+    }; });
+    numbers.forEach(function(n, i) { 
+        n.prev = numbers[mod(i-1, numbers.length)];
+        n.next = numbers[mod(i+1, numbers.length)];
+    });
+    numbers[numbers.length - 1].next = numbers[0];
+    numbers[0].prev = numbers[numbers.length - 1];
 
-let zeroIndex = numbers.findIndex(n => n==0);
+let zeroIndex = numbers.findIndex(n => n.n==0);
 //console.log({numbers:numbers.join(", "), zeroIndex});
 
 //for (var i = -20; i < 20; i++)
 //console.log({i, m:mod(i, numbers.length)});
 
+
+//NOT USED
 let pointers = {};
 let reverseLookup = {};
 numbers.forEach(function(n,i) { 
@@ -29,6 +38,7 @@ numbers.forEach(function(n,i) {
     reverseLookup[i] = i; 
 });
 
+//NOT USED
 function swapIndicies(a,b)
 {
     a = mod(a,numbers.length);
@@ -50,11 +60,6 @@ function swapIndicies(a,b)
     //console.log({pointers, reverseLookup,aIdx,bIdx});
     pointers[aIdx] = b;
     pointers[bIdx] = a;
-    /*aIdx = Object.entries(pointers).filter((v,i) => v[1] == a)[0][0];
-    bIdx = Object.entries(pointers).filter((v,i) => v[1] == b)[0][0];
-    console.log({pointers});
-    console.log({aIdx});
-    console.log({bIdx});*/
 
     reverseLookup[a] = bIdx;
     reverseLookup[b] = aIdx;
@@ -62,6 +67,7 @@ function swapIndicies(a,b)
     //console.log({pointers, reverseLookup});
 }
 
+/*
 let len = Object.values(pointers).length;
 for (var i = 0; i < len * repeats; i++)
 {
@@ -101,13 +107,105 @@ for (var i = 0; i < len * repeats; i++)
         }
     }
     //break;
+}*/
+function printLinkedList()
+{
+    let nums = [];
+    let p = numbers[zeroIndex];
+    do
+    {
+        nums.push(p.n);
+        p = p.next;
+    }
+    while(p != numbers[zeroIndex]);
+    return nums.join(", ");
+}
+let len = Object.values(numbers).length;
+for (var i = 0; i < len * repeats; i++)
+{
+    console.log({i, of:len * repeats, n:numbers[mod(i, len)].n});
+    if (i % len == 0 || !isPart2)
+    {
+        let zeroIndexNow = numbers[zeroIndex];
+    }
+    //console.log(i, pointers[i],originalNumbers[i], "\t",numbers.map((n,idx) => idx == pointers[i] ? `${n}*` : n).join(", "));
+
+    
+    let pOrig = Object.assign({}, numbers[mod(i, len)]);
+    let pCopy = Object.assign({}, numbers[mod(i, len)]);
+    
+    let pPrev = pOrig.prev;
+    let pNext = pOrig.next;
+    //console.log({pPrev:pPrev.n, pNext:pNext.n});
+    let p = numbers[mod(i, len)];
+    let read = p.n;
+    if (read != 0)
+    {
+        if (read > 0)
+        {
+            for (var j = 0; j < read; j++)
+            {
+                p = p.next;
+            }
+
+            pPrev.next = pNext;
+            pNext.prev = pPrev;
+            
+            var tmp = p.next;
+            p.next = pCopy;
+            pCopy.prev = p;
+            pCopy.next = tmp;
+            tmp.prev = pCopy;
+
+        }
+
+        if (read < 0)
+        {
+            for (var j = 0; j <= -read; j++)
+            {
+                p = p.prev;
+            }
+
+            pPrev.next = pNext;
+            pNext.prev = pPrev;
+
+            var tmp = p.prev;
+            p.prev = pOrig;
+            pOrig.next = p;
+            pOrig.prev = tmp;
+            tmp.next = pOrig;
+
+        }
+
+    }
+    
+    console.log({numbers:printLinkedList()});
+    //break;
 }
 
-
+/*
 let zeroIndexNow = pointers[zeroIndex];
 let oneThousand = BigInt(numbers[mod(zeroIndexNow+1000, numbers.length)]);
 let twoThousand = BigInt(numbers[mod(zeroIndexNow+2000, numbers.length)]);
 let threeThousand = BigInt(numbers[mod(zeroIndexNow+3000, numbers.length)]);
+*/
+
+let p = numbers[zeroIndex];
+for (var i = 0; i < 1000; i++)
+{
+    p = p.next;
+}
+let oneThousand = p.n;
+for (var i = 0; i < 1000; i++)
+{
+    p = p.next;
+}
+let twoThousand = p.n;
+for (var i = 0; i < 1000; i++)
+{
+    p = p.next;
+}
+let threeThousand = p.n;
 
 console.log({oneThousand, twoThousand, threeThousand, result:oneThousand+twoThousand+threeThousand}); //1196282411522 too low
 
