@@ -13,24 +13,28 @@ let numbers = utils.parseInts(input.split("\n"));
 //part 2
 let key = isPart2 ? 811589153 : 1;
 let repeats = isPart2 ? 10 : 1;
-    numbers = numbers.map(function(n, i) { return {
-        n:BigInt(n * key)
-    }; });
-    numbers.forEach(function(n, i) { 
-        n.prev = numbers[mod(i-1, numbers.length)];
-        n.next = numbers[mod(i+1, numbers.length)];
-    });
-    numbers[numbers.length - 1].next = numbers[0];
-    numbers[0].prev = numbers[numbers.length - 1];
+
+numbers = numbers.map(function(n, i) { return {
+    n:BigInt(n * key)
+}; });
+
+
+
+//FAILED LINKED LIST IMPLEMENTATION
+/*
+numbers.forEach(function(n, i) { 
+    n.prev = numbers[mod(i-1, numbers.length)];
+    n.next = numbers[mod(i+1, numbers.length)];
+});
+numbers[numbers.length - 1].next = numbers[0];
+numbers[0].prev = numbers[numbers.length - 1];
+
+*/
 
 let zeroIndex = numbers.findIndex(n => n.n==0);
-//console.log({numbers:numbers.join(", "), zeroIndex});
-
-//for (var i = -20; i < 20; i++)
-//console.log({i, m:mod(i, numbers.length)});
 
 
-//NOT USED
+//FAILED POINTERS IMPLEMENTATION
 let pointers = {};
 let reverseLookup = {};
 numbers.forEach(function(n,i) { 
@@ -67,25 +71,21 @@ function swapIndicies(a,b)
     //console.log({pointers, reverseLookup});
 }
 
-/*
+
 let len = Object.values(pointers).length;
+let blen = BigInt(len);
 for (var i = 0; i < len * repeats; i++)
 {
     console.log({i, of:len * repeats});
-    if (i % len == 0)
-    {
-        let zeroIndexNow = pointers[zeroIndex];
-        console.log({numbers:numbers.join(", "), zeroIndexNow});
-    }
     //console.log(i, pointers[i],originalNumbers[i], "\t",numbers.map((n,idx) => idx == pointers[i] ? `${n}*` : n).join(", "));
 
-    let read = numbers[pointers[mod(i, len)]];
+    let read = numbers[pointers[mod(i, len)]].n;
     if (read != 0)
     {
         if (read > 0)
         {
             let p = pointers[mod(i, len)];
-            for (var j = 0; j < read; j++)
+            for (var j = 0; j < mod(read, blen); j++)
             {
                 swapIndicies(p, p+1);
                 p = p+1;
@@ -97,7 +97,7 @@ for (var i = 0; i < len * repeats; i++)
         if (read < 0)
         {
             let p = pointers[mod(i, len)];
-            for (var j = 0; j < -read; j++)
+            for (var j = 0; j < mod(read, blen); j++)
             {
                 swapIndicies(p, p-1);
                 p = p-1;
@@ -106,8 +106,18 @@ for (var i = 0; i < len * repeats; i++)
             }
         }
     }
+    
+    if (i % len == 0)
+    {
+        let zeroIndexNow = pointers[zeroIndex];
+        console.log({numbers:numbers.map(n=> n.n).join(", "), zeroIndexNow});
+    }
     //break;
-}*/
+}
+
+
+//FAILED LINKED LIST
+/*
 function printLinkedList()
 {
     let nums = [];
@@ -183,13 +193,6 @@ for (var i = 0; i < len * repeats; i++)
     //break;
 }
 
-/*
-let zeroIndexNow = pointers[zeroIndex];
-let oneThousand = BigInt(numbers[mod(zeroIndexNow+1000, numbers.length)]);
-let twoThousand = BigInt(numbers[mod(zeroIndexNow+2000, numbers.length)]);
-let threeThousand = BigInt(numbers[mod(zeroIndexNow+3000, numbers.length)]);
-*/
-
 let p = numbers[zeroIndex];
 for (var i = 0; i < 1000; i++)
 {
@@ -209,3 +212,15 @@ let threeThousand = p.n;
 
 console.log({oneThousand, twoThousand, threeThousand, result:oneThousand+twoThousand+threeThousand}); //1196282411522 too low
 
+*/
+
+//ORIGINAL LINKED LIST 
+let zeroIndexNow = pointers[zeroIndex];
+        console.log({numbers:numbers.map(n=> n.n).join(", "), zeroIndexNow});
+    
+let oneThousand = BigInt(numbers[mod(zeroIndexNow+1000, numbers.length)].n);
+let twoThousand = BigInt(numbers[mod(zeroIndexNow+2000, numbers.length)].n);
+let threeThousand = BigInt(numbers[mod(zeroIndexNow+3000, numbers.length)].n);
+
+
+console.log({zeroIndexNow,oneThousand, twoThousand, threeThousand, result:oneThousand+twoThousand+threeThousand}); //1196282411522 too low
