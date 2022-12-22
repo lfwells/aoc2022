@@ -88,32 +88,37 @@ let maxX = Math.max(...points.map(point => point[0]));
 let memo = {};
 for (var z = minZ; z <= maxZ; z++)
 {
-    if (z != 8) continue;
+    //if (z != 8) continue;
 
-    console.log({z, maxZ});
+    //console.log({z, maxZ});
     let zSlice = points.filter(point => point[2] == z);
     let minY = Math.min(...zSlice.map(point => point[1]));
     let maxY = Math.max(...zSlice.map(point => point[1]));
     for (var y = minY; y <= maxY; y++)
     {
-        if (y != 8) continue;
+        //if (y != 8) continue;
 
         let ySlice = zSlice.filter(point => point[1] == y);
         let minX = Math.min(...ySlice.map(point => point[0]));
         let maxX = Math.max(...ySlice.map(point => point[0]));
         for (var x = minX; x <= maxX; x++)
         {
-            console.log({x,maxX});
+            //console.log({x,maxX});
             
             let isHole = pointsCache[index(x,y,z)] == undefined;
             let found = {};
+            let searched = new Set();
             if (isHole)
             {
                 //this isnt right yet...
-                function check(point, itr)
+                /*
+                function checkBORKED(point, itr)
                 {
-                    console.log("check", point);
-                    if (memo[index(...point)] != undefined) { /*console.log("MEMO", point);*/ return memo[index(...point)];}
+                    
+                    wrongCells[index(...point)] = "C";
+                    //if (point[2] == 10 && point[1] <=3 && point[0] == 8)
+                    //    console.log("check", point, itr);
+                    //if (memo[index(...point)] != undefined) { return memo[index(...point)];}
                     
                     if (pointsCache[index(...point)]) {
                         found[index(...point)] = true;
@@ -121,35 +126,48 @@ for (var z = minZ; z <= maxZ; z++)
                         wrongCells[index(...point)] = "#";//itr%10;
                         return true;
                     }
-                    if (itr >= 500) { 
+                    if (point[0] < 0 || point[0] >= 20 ||
+                        point[1] < 0 || point[1] >= 20 ||
+                        point[2] < 0 || point[2] >= 20 ||
+                        itr >= 500) { 
                         found[index(...point)] = false;
                         memo[index(...point)] = false;
                         wrongCells[index(...point)] = "X";//itr%10;
                         return false;
                     }
 
-                    /*let dirs = neighbours.map(function(dir) {
-                        let newX = point[0]+dir[0]; let newY = point[1]+dir[1]; let newZ = point[2]+dir[2];
-                        return check([newX,newY,newZ], itr + 1);
-                    });
-
-                    let result = dirs.every(d => d);
-*/
-console.log("---");
+//console.log("---");
                     let result = true;
+                    let searchCount = 0;
                     for (var i = 0; i < neighbours.length; i++)
                     {
                         let dir = neighbours[i];
                         if (dir[2] != 0) continue;
                         let newX = point[0]+dir[0]; let newY = point[1]+dir[1]; let newZ = point[2]+dir[2];
-                        console.log({point, dir, newX,newY,newZ, found:found[index(newX,newY,newZ)]});
-                        if (found[index(newX,newY,newZ)] != undefined) { continue; }
+                        
+                        //if (point[2] == 10 && point[1] <=3)
+                        //    console.log({point, dir, newX,newY,newZ, found:found[index(newX,newY,newZ)]});
+                        
+                
+                        //if (searched.has(index(newX,newY,newZ))) { continue; }
+                        if (found[index([newX,newY,newZ])] === false) {
+                           
+                            result = false;
+                            wrongCells[index([newX,newY,newZ])] = "F";
+                            break;
+                         }
+                         searchCount++;
 
                         let c = check([newX,newY,newZ], itr + 1);
+                        if (point[2] == 10 && point[1] ==2 && point[0] == 8)
+                        {
+                            //console.log({c,point,dir,new:([newX,newY,newZ]), found: found[index([newX,newY,newZ])], itr});
+                        }
                         if (c === false)
                         {
                             result = false;
-                            wrongCells[index([newX,newY,newZ])] = itr % 10;
+                            wrongCells[index([newX,newY,newZ])] = "F";
+                            found[index([newX,newY,newZ])] = false;
                             //wrongCells[index(...point)] = (wrongCells[index(...point)] ?? 0) +1;
                             break;
                         }
@@ -157,9 +175,65 @@ console.log("---");
 
                     found[index(...point)] = result;
                     memo[index(...point)] = result;
-                    if (result) wrongCells[index(...point)] = "A";
+                    if (result) wrongCells[index(...point)] = searchCount;
 
                     return result;
+                }*/
+                function check(point, itr)
+                {
+                    searched.add(index(...point));
+                    //wrongCells[index(...point)] = "C";
+
+                    if (point[0] < 0 || point[0] >= 20 ||
+                        point[1] < 0 || point[1] >= 20 ||
+                        point[2] < 0 || point[2] >= 20 ||
+                        itr >= 5000) 
+                    {
+                        wrongCells[index(...point)] = "X"; 
+                        found[index(...point)] = false;
+                        return false;
+                    }
+                    
+                    if (pointsCache[index(...point)]) 
+                    {
+                        //wrongCells[index(...point)] = "#";//itr%10;
+                        found[index(...point)] = true;
+                        return true;
+                    }
+
+
+
+                    for (var i = 0; i < neighbours.length; i++)
+                    {
+                        let dir = neighbours[i];
+                        //if (dir[2] != 0) continue;
+
+                        let newPoint = [point[0]+dir[0], point[1]+dir[1], point[2]+dir[2]];
+                        if (searched.has(index(...newPoint))) continue;
+
+                        let foundValue = found[index(...newPoint)];
+                        if (foundValue != undefined)
+                        {
+                            if (foundValue === true)
+                            {
+                                continue;
+                            }
+                            //wrongCells[index(...point)] = "F"; 
+                            found[index(...point)] = false;
+                            return false;
+                        }
+                        
+                        let c = check(newPoint,itr+1);
+                        if (c === false)
+                        {
+                            //wrongCells[index(...point)] = "F"; 
+                            found[index(...point)] = false;
+                            return false;
+                        }
+                    }
+                    //wrongCells[index(...point)] = "T"; 
+                    found[index(...point)] = true;
+                    return true;
                 }
                 isHole = isHole && check([x,y,z], 0);
 
@@ -186,11 +260,12 @@ console.log("---");
                 //let adjacentNeighbours = neighbours.filter(n => isAdjacent([x,y,z], n)).length;
                 //sides -= adjacentNeighbours;
                 pointsCache[index(x,y,z)] = true;
-                Object.values(found).forEach(f => {
+                /*Object.values(found).forEach(f => {
                     pointsCache[index(f[0],f[1],f[2])] = true;
                     outsideCells[index(f[0],f[1],f[2])] = true;
                 });
-                outsideCells[index(x,y,z)] = true;
+                outsideCells[index(x,y,z)] = true;*/
+
 /*
                 let arr = {};
                 try
@@ -210,7 +285,7 @@ console.log("---");
 
 for (var z = minZ-1; z <= maxZ+1; z++)
 {
-    if (z != 8) continue;
+    if (z != 10) continue;
     console.log({z});
     let grid = [];
     for (var y = minY-1; y <= maxY+1; y++)
@@ -220,8 +295,8 @@ for (var z = minZ-1; z <= maxZ+1; z++)
         {
             //let aN = neighbours.filter(n => isAdjacentToOutsidePoint([x,y,z], n)).length;
             //line.push(aN > 0 ? aN : ".");
-            //line.push(wrongCells[index(x,y,z)] != undefined ? wrongCells[index(x,y,z)] : outsideCells[index(x,y,z)] ? "@" : pointsCache[index(x,y,z)] ? "#" : ".")
-            line.push(wrongCells[index(x,y,z)] != undefined ? wrongCells[index(x,y,z)] : ".")
+            line.push(wrongCells[index(x,y,z)] != undefined ? wrongCells[index(x,y,z)] : outsideCells[index(x,y,z)] ? "@" : pointsCache[index(x,y,z)] ? "#" : ".")
+            //line.push(wrongCells[index(x,y,z)] != undefined ? wrongCells[index(x,y,z)] : ".")
         }
         grid.push(line.join(""));
     }
@@ -297,7 +372,7 @@ for (var x = minX; x <= maxX; x++)
 */
 
 //console.log({outsideCells, len:Object.values(outsideCells).length, minX, minY, minZ, maxX, maxY, maxZ});
-
+/*
 function isAdjacentToOutsidePoint(point, n)
 {
     n = [point[0]+n[0], point[1]+n[1], point[2]+n[2]];
@@ -314,6 +389,7 @@ points.forEach(function(point) {
     //console.log({point, adjacentNeighbours});
     sides -= adjacentNeighbours;
 });
+*/
 /*
 let sides = 0
 Object.values(outsideCells).forEach(function(point){
