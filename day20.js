@@ -6,6 +6,8 @@ const isPart2 = true;
 const input = fs.readFileSync("day20.input").toString();
 
 function mod(n, m) {
+    //console.log(typeof(n), n)
+    //console.log(typeof(m), m)
     return ((n % m) + m) % m;
   }
 let numbers = utils.parseInts(input.split("\n"));
@@ -14,9 +16,7 @@ let numbers = utils.parseInts(input.split("\n"));
 let key = isPart2 ? 811589153 : 1;
 let repeats = isPart2 ? 10 : 1;
 
-numbers = numbers.map(function(n, i) { return {
-    n:BigInt(n * key)
-}; });
+numbers = numbers.map(function(n, i) { return {n:BigInt(n * key)} });
 
 
 
@@ -35,11 +35,15 @@ let zeroIndex = numbers.findIndex(n => n.n==0);
 
 
 //FAILED POINTERS IMPLEMENTATION
-let pointers = {};
+let pointers = [];
 let reverseLookup = {};
-numbers.forEach(function(n,i) { 
+/*numbers.forEach(function(n,i) { 
     pointers[i] = i; 
     reverseLookup[i] = i; 
+});*/
+numbers.forEach(function(n,i) { 
+    pointers[i] = n; 
+    //reverseLookup[i] = i; 
 });
 
 //NOT USED
@@ -71,6 +75,15 @@ function swapIndicies(a,b)
     //console.log({pointers, reverseLookup});
 }
 
+function printNumbers() //actually semi hard/annoying to do now lol
+{
+
+    let zeroIndexNow = numbers.indexOf(pointers[zeroIndex]);
+    console.log({numbers:numbers.map(p=> p.n).join(", "), zeroIndexNow});
+
+    //console.log({numbers:pointers.map(p=> p.n).join(", "), zeroIndexNow});
+}
+
 
 let len = Object.values(pointers).length;
 let blen = BigInt(len);
@@ -79,40 +92,50 @@ for (var i = 0; i < len * repeats; i++)
     console.log({i, of:len * repeats});
     //console.log(i, pointers[i],originalNumbers[i], "\t",numbers.map((n,idx) => idx == pointers[i] ? `${n}*` : n).join(", "));
 
-    let read = numbers[pointers[mod(i, len)]].n;
+    //the mod on this line causing issues
+    //let read = mod(pointers[mod(i, len)].n, blen);
+    let read = pointers[mod(i, len)].n % blen;
+    //console.log({read});
     if (read != 0)
     {
         if (read > 0)
         {
-            let p = pointers[mod(i, len)];
+            let p = numbers.indexOf(pointers[mod(i, len)]);
+            let removed = numbers.splice(p, 1);
+            console.log({removed});
+            numbers.splice(mod(p+Number(read), len),0,...removed);
+            /*
             for (var j = 0; j < mod(read, blen); j++)
             {
                 swapIndicies(p, p+1);
                 p = p+1;
 
                 //console.log("\t", numbers.map((n,idx) => idx == pointers[i] ? `${n}*` : n).join(", "));
-            }
+            }*/
         }
 
         if (read < 0)
         {
-            let p = pointers[mod(i, len)];
+            let p = numbers.indexOf(pointers[mod(i, len)]);
+            let removed = numbers.splice(p, 1);
+            console.log({removed});
+            numbers.splice(mod(p-Number(read), len),0,...removed);
+            /*
             for (var j = 0; j < mod(read, blen); j++)
             {
                 swapIndicies(p, p-1);
                 p = p-1;
 
                 //console.log("\t", numbers.map((n,idx) => idx == pointers[i] ? `${n}*` : n).join(", "));
-            }
+            }*/
         }
     }
     
     if (i % len == 0)
     {
-        let zeroIndexNow = pointers[zeroIndex];
-        console.log({numbers:numbers.map(n=> n.n).join(", "), zeroIndexNow});
+        printNumbers();
     }
-    //break;
+    //if (i == 1)break;
 }
 
 
@@ -215,9 +238,9 @@ console.log({oneThousand, twoThousand, threeThousand, result:oneThousand+twoThou
 */
 
 //ORIGINAL LINKED LIST 
-let zeroIndexNow = pointers[zeroIndex];
-        console.log({numbers:numbers.map(n=> n.n).join(", "), zeroIndexNow});
+printNumbers();
     
+let zeroIndexNow = numbers.indexOf(pointers[zeroIndex]);
 let oneThousand = BigInt(numbers[mod(zeroIndexNow+1000, numbers.length)].n);
 let twoThousand = BigInt(numbers[mod(zeroIndexNow+2000, numbers.length)].n);
 let threeThousand = BigInt(numbers[mod(zeroIndexNow+3000, numbers.length)].n);

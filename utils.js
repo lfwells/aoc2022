@@ -15,6 +15,13 @@ export const parseInts = function(arr)
     return arr.map(n => parseInt(n));
 }
 
+
+export const mod = function(n, m) {
+  //console.log(typeof(n), n)
+  //console.log(typeof(m), m)
+  return ((n % m) + m) % m;
+}
+
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
 export const isSuperset = function(set, subset) {
     for (const elem of subset) {
